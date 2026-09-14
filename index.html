@@ -428,7 +428,54 @@
       document.getElementById('chat-panel').classList.remove('open');
       document.getElementById('chat-btn').style.display = 'flex';
     }
+    // Historial de la conversación
+let conversationHistory = [];
 
+async function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text || loading) return;
+
+  inputEl.value = '';
+  renderMessage({ role: 'user', content: text });
+  conversationHistory.push({ role: 'user', content: text });
+
+  loading = true;
+  sendBtn.disabled = true;
+
+  // Mostrar "Escribiendo..."
+  const typing = document.createElement('div');
+  typing.className = 'msg bot typing';
+  typing.id = 'typing';
+  typing.textContent = 'Escribiendo…';
+  messagesEl.appendChild(typing);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: conversationHistory }),
+    });
+
+    const data = await res.json();
+    document.getElementById('typing')?.remove();
+
+    if (data.reply) {
+      renderMessage({ role: 'bot', content: data.reply });
+      conversationHistory.push({ role: 'assistant', content: data.reply });
+    } else {
+      renderMessage({ role: 'bot', content: 'Lo siento, hubo un problema. Intenta de nuevo.' });
+    }
+  } catch (err) {
+    document.getElementById('typing')?.remove();
+    renderMessage({ role: 'bot', content: 'Error de conexión. Por favor intenta más tarde.' });
+  }
+
+  loading = false;
+  sendBtn.disabled = false;
+  inputEl.focus();
+}
+/*
     function generateReply(text) {
       const t = text.toLowerCase();
       if (t.includes('precio') || t.includes('cuánto') || t.includes('costo') || t.includes('cotiz')) {
@@ -480,7 +527,7 @@
         sendBtn.disabled = false;
         inputEl.focus();
       }, 800 + Math.random() * 700);
-    }
+    }*/
   </script>
 </body>
 </html>
