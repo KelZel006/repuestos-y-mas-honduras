@@ -8,6 +8,8 @@ const workbook = XLSX.readFile(inventarioPath);
 const primeraHoja = workbook.Sheets[workbook.SheetNames[0]];
 const inventarioCSV = XLSX.utils.sheet_to_csv(primeraHoja);
 
+console.log('Tamaño del inventario en caracteres:', inventarioCSV.length);
+
 const SYSTEM_PROMPT = `## 1. Identidad y rol
 Eres el asistente virtual de ventas de **Repuesto y Más Honduras**.
 Tu nombre es **Roberto**.
